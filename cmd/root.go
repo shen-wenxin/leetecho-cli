@@ -10,18 +10,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "leetecho-cli",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "A cli tool for Leetecho",
+	Long: `A cli tool for leetecho.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Leetecho(GUI) is an elegant, experience-friendly product that
+automatically generates LeetCode solutions and notes and
+publishes them to personal repositories on code hosting platforms.
+Leetecho-cli simply implements basic functionality in Leetecho,
+such as publishing problems and notes according to
+the configured template, login and logout, and
+checking updates.
+	`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -47,5 +49,3 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-
