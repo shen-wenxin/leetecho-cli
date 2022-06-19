@@ -8,50 +8,54 @@ import (
 	"strings"
 
 	"github.com/shurcooL/graphql"
-
-	leetcode_client "github.com/CallanBi/leetecho-cli/leetcode_client"
 )
 
 type Helper struct {
-	Credit        *leetcode_client.Credit
-	BaseURI       *leetcode_client.EndpointURI
-	HTTPClient    *http.Client
+	Credit        *Credit
+	BaseURI       *EndpointURI
 	GraphQLClient *graphql.Client
 }
 
 var helper *Helper = nil
 
+var httpClient *http.Client = nil
+
 /**
  * Get the singleton instance of Helper
  */
-func GetHelper(credit *leetcode_client.Credit, baseURI *leetcode_client.EndpointURI) *Helper {
+func GetHelper(credit *Credit, baseURI *EndpointURI) *Helper {
 	if helper != nil {
 		return helper
 	}
-	HTTPClient := &http.Client{
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			// disable redirect
-			return http.ErrUseLastResponse
-		},
-	}
 
-	GraphQlClient := graphql.NewClient(baseURI.Graphql, HTTPClient)
+	GraphQlClient := graphql.NewClient(baseURI.Graphql, httpClient)
 
 	helper = &Helper{
 		Credit:        credit,
 		BaseURI:       baseURI,
-		HTTPClient:    HTTPClient,
 		GraphQLClient: GraphQlClient,
 	}
 
 	return helper
 }
 
-func (helper *Helper) SetCredit(credit *leetcode_client.Credit) {
+func GetHTTPClient() *http.Client {
+	if httpClient == nil {
+		httpClient = &http.Client{
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				// disable redirect
+				return http.ErrUseLastResponse
+			},
+		}
+	}
+	return httpClient
+}
+
+func (helper *Helper) SetCredit(credit *Credit) {
 	helper.Credit = credit
 }
 
-func (helper *Helper) SetBaseURI(baseURI *leetcode_client.EndpointURI) {
+func (helper *Helper) SetBaseURI(baseURI *EndpointURI) {
 	helper.BaseURI = baseURI
 }
 
@@ -79,12 +83,22 @@ func ParseCookie(cookies []string, key string) string {
 	return ""
 }
 
-func (helper *Helper) SwitchEndPoint(endPoint leetcode_client.EndPoint) {
+func GetEndPoint(endPoint EndPoint) *EndpointURI {
 	switch endPoint {
-	case leetcode_client.US:
-		helper.SetBaseURI(leetcode_client.BaseURI.US)
-	case leetcode_client.CN:
-		helper.SetBaseURI(leetcode_client.BaseURI.CN)
+	case US:
+		return BaseURI.US
+	case CN:
+		return BaseURI.CN
+	}
+	return nil
+}
+
+func (helper *Helper) SwitchEndPoint(endPoint EndPoint) {
+	switch endPoint {
+	case US:
+		helper.SetBaseURI(BaseURI.US)
+	case CN:
+		helper.SetBaseURI(BaseURI.CN)
 	}
 }
 
@@ -93,13 +107,21 @@ type HTTPRequestParam struct {
 	URL                     string
 	Referer                 string
 	ResolveWithFullResponse bool
-	Form                    map[string][]string
+	Form                    *map[string][]string
 	Body                    string
-	Header                  map[string]string
+	Header                  *map[string]string
 }
 
-func (helper *Helper) HTTPRequest(param HTTPRequestParam) (*http.Response, error) {
-	req, err := http.NewRequest(param.Method, param.URL, nil)
+func HTTPRequest(param *HTTPRequestParam) (*http.Response, error) {
+	var (
+		method string = param.Method
+	)
+
+	if method == "" {
+		method = "GET"
+	}
+
+	req, err := http.NewRequest(method, param.URL, nil)
 
 	if err != nil {
 		return nil, err
@@ -119,19 +141,21 @@ func (helper *Helper) HTTPRequest(param HTTPRequestParam) (*http.Response, error
 		req.Header.Set("Referer", helper.BaseURI.Base)
 	}
 
-	for k, v := range param.Header {
+	for k, v := range *param.Header {
 		req.Header.Set(k, v)
 	}
 
 	if param.Form != nil {
-		req.PostForm = param.Form
+		req.PostForm = *param.Form
 	}
 
 	if param.Body != "" {
 		req.Body = ioutil.NopCloser(strings.NewReader(param.Body))
 	}
 
-	return helper.HTTPClient.Do(req)
+	innerHttpClient := GetHTTPClient()
+
+	return innerHttpClient.Do(req)
 }
 
 type GraphqlRequestParam struct {

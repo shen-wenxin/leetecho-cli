@@ -1,6 +1,11 @@
-package leetcode_client
+package helper
 
 type URI string
+
+type Credit struct {
+	Session   string
+	CSRFToken string
+}
 
 type EndpointURI struct {
 	Base    string
