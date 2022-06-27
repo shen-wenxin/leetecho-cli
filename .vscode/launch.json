@@ -11,7 +11,10 @@
       "mode": "debug",
       "program": "${workspaceRoot}/main.go",
       "env": {},
-      "args": [],
+      // args is a list of arguments(like commands and flags) passed to the launched program, e.g., ["login", "--help"]
+      "args": [
+        "login",
+      ],
       "console": "integratedTerminal",
     }
   ]

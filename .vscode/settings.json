@@ -3,6 +3,8 @@
     "csrfmiddlewaretoken",
     "csrftoken",
     "leetcode",
+    "reponame",
+    "repousername",
     "shurcoo"
   ]
 }

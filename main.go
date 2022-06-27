@@ -10,6 +10,4 @@ import (
 
 func main() {
 	cmd.Execute()
-	// press any key to exit
-	// fmt.Scanln()
 }
