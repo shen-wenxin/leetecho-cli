@@ -13,7 +13,8 @@
       "env": {},
       // args is a list of arguments(like commands and flags) passed to the launched program, e.g., ["login", "--help"]
       "args": [
-        "login",
+        // "login",
+        "logout",
       ],
       "console": "integratedTerminal",
     }

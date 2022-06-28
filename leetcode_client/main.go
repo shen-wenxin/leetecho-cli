@@ -67,7 +67,6 @@ func Login(username string, password string, endpointURI *helper.EndpointURI) (c
 		err = realErr
 		return
 	}
-	defer realRes.Body.Close()
 
 	session := helper.ParseCookie(realRes.Header["Set-Cookie"], "LEETCODE_SESSION")
 	csrfToken := helper.ParseCookie(realRes.Header["Set-Cookie"], "csrftoken")
