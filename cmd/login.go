@@ -59,15 +59,15 @@ func Login() {
 		if leetechoError, ok := initClientErr.(*helper.ErrorResp); ok {
 			if leetechoError.Code == 400 {
 				color.Red("Login failed. Username or password is incorrect.")
-				Logout()
+				WipeConfig()
 			} else {
 				color.Red("An Error occurs when initializing client: " + initClientErr.Error())
-				Logout()
+				WipeConfig()
 			}
 			os.Exit(1)
 		} else {
 			color.Red("An Error occurs when initializing client: " + initClientErr.Error())
-			Logout()
+			WipeConfig()
 			os.Exit(1)
 		}
 	}
