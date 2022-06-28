@@ -18,22 +18,9 @@ type Base struct {
 	CN *EndpointURI
 }
 
-var BaseURI *Base = &Base{
-	US: &EndpointURI{
-		Base:    "https://leetcode.com/",
-		Login:   "https://leetcode.com/accounts/login/",
-		Graphql: "https://leetcode.com/graphql",
-	},
-	CN: &EndpointURI{
-		Base:    "https://leetcode.cn/",
-		Login:   "https://leetcode.cn/accounts/login/",
-		Graphql: "https://leetcode.cn/graphql",
-	},
+// ErrorResp is the customized error for all leetecho-cli business
+type ErrorResp struct {
+	Status  LeetechoStatus  `json:"status"`
+	Code    LeetechoCode    `json:"code"`
+	Message LeetechoMessage `json:"message"`
 }
-
-type EndPoint string
-
-const (
-	US EndPoint = "US"
-	CN EndPoint = "CN"
-)

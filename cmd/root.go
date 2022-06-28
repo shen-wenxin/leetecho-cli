@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 
+	color "github.com/fatih/color"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -37,6 +39,7 @@ checking updates.
 func Execute() {
 	err := RootCmd.Execute()
 	if err != nil {
+		color.Red("An Error occurs when executing command: %v", err)
 		os.Exit(1)
 	}
 }
@@ -59,7 +62,7 @@ func init() {
 func initConfig() {
 	home, err := homedir.Dir()
 	if err != nil {
-		fmt.Println(err)
+		color.Red("An Error occurs when getting home directory: %v", err)
 		os.Exit(1)
 	}
 
@@ -101,16 +104,16 @@ func initConfig() {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// If no config file is found, create the folder and file.
 			if err := os.MkdirAll(home+sep+".leetecho-cli", 0777); err != nil {
-				fmt.Println(err)
+				color.Red("An Error occurs when creating config directory: %v", err)
 				os.Exit(1)
 			}
 			if err := viper.WriteConfigAs(home + sep + ".leetecho-cli" + sep + ".leetecho-cli.yaml"); err != nil {
-				fmt.Println(err)
+				color.Red("An Error occurs when creating config file: %v", err)
 				os.Exit(1)
 			}
 			fmt.Println("No config file found, created one at", home+sep+".leetecho-cli"+sep+".leetecho-cli.yaml")
 		} else {
-			fmt.Println(err)
+			color.Red("An Error occurs when reading config file: %v", err)
 			os.Exit(1)
 		}
 	}

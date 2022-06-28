@@ -4,6 +4,7 @@ import (
 	"context"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -121,32 +122,51 @@ func HTTPRequest(param *HTTPRequestParam) (*http.Response, error) {
 		method = "GET"
 	}
 
-	req, err := http.NewRequest(method, param.URL, nil)
+	form := url.Values{}
+
+	if param.Form != nil {
+		for key, value := range *param.Form {
+			form.Add(key, value[0])
+		}
+	}
+
+	req, err := http.NewRequest(method, param.URL, strings.NewReader(form.Encode()))
 
 	if err != nil {
 		return nil, err
 	}
 
-	if helper.Credit != nil {
-		req.Header.Set("Cookie", `LEETCODE_SESSION=`+helper.Credit.Session+`;csrftoken=`+helper.Credit.CSRFToken)
+	if helper != nil {
+		if helper.Credit != nil {
+			req.Header.Set("Cookie", `LEETCODE_SESSION=`+helper.Credit.Session+`;csrftoken=`+helper.Credit.CSRFToken)
+		}
 	}
 
 	req.Header.Set("X-Requested-With", "XMLHttpRequest")
 
-	req.Header.Set("X-CSRFToken", helper.Credit.CSRFToken)
+	if helper != nil {
+		req.Header.Set("X-CSRFToken", helper.Credit.CSRFToken)
+	}
 
 	if param.Referer != "" {
 		req.Header.Set("Referer", param.Referer)
 	} else {
-		req.Header.Set("Referer", helper.BaseURI.Base)
+		if helper != nil {
+			req.Header.Set("Referer", helper.BaseURI.Base)
+		} else {
+			req.Header.Set("Referer", BaseURI.CN.Base)
+		}
 	}
 
-	for k, v := range *param.Header {
-		req.Header.Set(k, v)
+	if param.Header != nil {
+		for k, v := range *param.Header {
+			req.Header.Set(k, v)
+		}
 	}
 
-	if param.Form != nil {
-		req.PostForm = *param.Form
+	if method == "POST" {
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req.PostForm = form
 	}
 
 	if param.Body != "" {
@@ -156,6 +176,63 @@ func HTTPRequest(param *HTTPRequestParam) (*http.Response, error) {
 	innerHttpClient := GetHTTPClient()
 
 	return innerHttpClient.Do(req)
+}
+
+// HTTPParseHandler parses the response and returns the struct of the response and error
+//  @param resp *http.Response
+//  @param requestErr error
+//  @return interface{}  the struct of the response
+//  @return error  	 *ErrorResp{}
+func HTTPParseHandler(resp *http.Response, requestErr error) (interface{}, error) {
+	if requestErr != nil {
+		return nil, requestErr
+	}
+
+	defer resp.Body.Close()
+
+	var respJSONStruct interface{}
+
+	if resp.StatusCode != http.StatusOK {
+		decodeErr := DecodeResponseJSONBody(resp, &respJSONStruct)
+		if decodeErr != nil {
+			return nil, &ErrorResp{
+				Status:  LeetechoStatus(resp.Status),
+				Code:    LeetechoCode(resp.StatusCode),
+				Message: LeetechoMessage(resp.Status),
+			}
+		}
+		// type assertion
+		if str, ok := respJSONStruct.(string); ok {
+			return nil, &ErrorResp{
+				Status:  LeetechoStatus(resp.Status),
+				Code:    LeetechoCode(resp.StatusCode),
+				Message: LeetechoMessage(str),
+			}
+		} else {
+			return nil, &ErrorResp{
+				Status:  LeetechoStatus(resp.Status),
+				Code:    LeetechoCode(resp.StatusCode),
+				Message: LeetechoMessage(resp.Status),
+			}
+		}
+	} else {
+		decodeErr := DecodeResponseJSONBody(resp, &respJSONStruct)
+		if decodeErr != nil {
+			return nil, &ErrorResp{
+				Status:  DECODE_JSON_ERROR_STATUS,
+				Code:    DECODE_JSON_ERROR_CODE,
+				Message: DECODE_JSON_ERROR_MESSAGE,
+			}
+		}
+		return respJSONStruct, nil
+	}
+}
+
+func WrappedHTTPRequest(param *HTTPRequestParam) (rawResp *http.Response, respJSON interface{}, err error) {
+	resp, err := HTTPRequest(param)
+	respJSON, err = HTTPParseHandler(resp, err)
+	rawResp = resp
+	return
 }
 
 type GraphqlRequestParam struct {

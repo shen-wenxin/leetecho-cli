@@ -14,7 +14,8 @@ type LeetCodeClient struct {
 func Build(username string, password string, endpoint helper.EndPoint) (leetcode *LeetCodeClient, err error) {
 	endpointURI := helper.GetEndPoint(endpoint)
 	credit, LoginErr := Login(username, password, endpointURI)
-	if err != nil {
+	if LoginErr != nil {
+		leetcode = nil
 		err = LoginErr
 		return
 	}
@@ -40,9 +41,8 @@ func Login(username string, password string, endpointURI *helper.EndpointURI) (c
 	if err != nil {
 		credit = nil
 		err = firstLoginErr
+		return
 	}
-
-	defer res.Body.Close() // avoid memory leak
 
 	header := res.Header
 	token := helper.ParseCookie(header["Set-Cookie"], "csrftoken")
@@ -52,11 +52,11 @@ func Login(username string, password string, endpointURI *helper.EndpointURI) (c
 	}
 
 	// then login
-	realRes, realErr := helper.HTTPRequest(&helper.HTTPRequestParam{
+	realRes, _, realErr := helper.WrappedHTTPRequest(&helper.HTTPRequestParam{
 		Method: "POST",
 		URL:    endpointURI.Login,
 		Form: &map[string][]string{
-			"csrfmiddlewaretoken": {credit.CSRFToken},
+			"csrfmiddlewaretoken": {tempCredit.CSRFToken},
 			"login":               {username},
 			"password":            {password},
 		},
@@ -65,6 +65,7 @@ func Login(username string, password string, endpointURI *helper.EndpointURI) (c
 	if realErr != nil {
 		credit = nil
 		err = realErr
+		return
 	}
 	defer realRes.Body.Close()
 
