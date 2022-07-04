@@ -38,7 +38,7 @@ func Login(username string, password string, endpointURI *helper.EndpointURI) (c
 		URL: endpointURI.Login,
 	})
 
-	if err != nil {
+	if firstLoginErr != nil {
 		credit = nil
 		err = firstLoginErr
 		return

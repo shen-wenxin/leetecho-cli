@@ -7,9 +7,9 @@ import "fmt"
 //  @return string the customized error message
 func (e *ErrorResp) Error() string {
 	return fmt.Sprintf(`
-Error Status: %s;
-Error Code: %d;
-Error Message: %s;`, e.Status, e.Code, e.Message)
+Error Status: %s
+Error Code: %d
+Error Message: %s`, e.Status, e.Code, e.Message)
 }
 
 func GetErrorCodeMessage(code LeetechoCode) LeetechoMessage {

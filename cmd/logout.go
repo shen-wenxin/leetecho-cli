@@ -23,16 +23,29 @@ func init() {
 }
 
 func logoutMain(cmd *cobra.Command, args []string) {
-	WipeConfig()
-	color.Green("Logout successfully. All configurations are wiped out.")
+	wipeOk := WipeConfig()
+	if wipeOk {
+		color.Green("Logout successfully. All configurations are wiped out.")
+	}
 }
 
-func WipeConfig() {
+func WipeConfig() (ok bool) {
+	if !IsLogin() {
+		ok = false
+		return
+	}
 	if LeetcodeClient != nil {
 		LeetcodeClient = nil
 	}
 	// remove all config
-	Unset("username", "password", "endpoint", "reponame", "repousername", "branch", "email", "token")
+	err := Unset("username", "password", "endpoint", "reponame", "repousername", "branch", "email", "token")
+	if err != nil {
+		color.Red("Failed to wipe configuration: %s", err)
+		ok = false
+		return
+	}
+	ok = true
+	return
 }
 
 func Unset(vars ...string) error {

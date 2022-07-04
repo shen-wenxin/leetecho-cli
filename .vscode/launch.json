@@ -13,8 +13,12 @@
       "env": {},
       // args is a list of arguments(like commands and flags) passed to the launched program, e.g., ["login", "--help"]
       "args": [
-        // "login",
-        "logout",
+        "login",
+        // "logout",
+        // "setcfg",
+        // "-r=My-LeetCode-Notes",
+        // "--email=mcbihv@126.com",
+        // "-t=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",
       ],
       "console": "integratedTerminal",
     }

@@ -79,7 +79,9 @@ func Login() {
 	viper.Set("endpoint", helper.CN)
 	viper.WriteConfig()
 
-	color.Green(fmt.Sprintf("Login successful. Current user: %s; Current endpoint: %s. ", username, helper.CN))
+	color.Green(fmt.Sprintf("Login successful. Current user: %s; Current endpoint: %s. \n", username, helper.CN))
+	color.Green(fmt.Sprintln("All user information is stored."))
+
 }
 
 func getLoginInfo() (username string, password string) {
@@ -90,8 +92,6 @@ func getLoginInfo() (username string, password string) {
 		password = viper.GetString("password")
 		return
 	} else {
-		info := color.New(color.FgWhite, color.BgHiYellow).SprintFunc()
-		fmt.Println(info("No user found in your configuration file. Please enter your username and password. "))
 		// ask for username and password
 		asked := color.New(color.Bold).SprintFunc()
 		fmt.Println(asked("Enter your LeetCode(CN) username: "))

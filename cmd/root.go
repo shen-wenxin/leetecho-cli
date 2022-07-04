@@ -1,6 +1,5 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
-
+Copyright © 2022 CallanBi <mcbihv@126.com>
 */
 package cmd
 
@@ -76,29 +75,17 @@ func initConfig() {
 
 	if err := viper.ReadInConfig(); err == nil {
 		// If a config file is found, read it in.
-		if len(viper.AllSettings()) > 0 {
-			// if config file is not empty
-			fmt.Println("Using the following config: ")
-		}
-		// read username
-		if username := viper.GetString("username"); username != "" {
-			fmt.Println("username:", username)
-		}
-		// read reponame
-		if reponame := viper.GetString("reponame"); reponame != "" {
-			fmt.Println("reponame:", reponame)
-		}
-		// read branch
-		if branch := viper.GetString("branch"); branch != "" {
-			fmt.Println("branch:", branch)
-		}
-		// read repousername
-		if repousername := viper.GetString("repousername"); repousername != "" {
-			fmt.Println("repousername:", repousername)
-		}
-		// read email
-		if email := viper.GetString("email"); email != "" {
-			fmt.Println("email:", email)
+		if IsLogin() {
+			info := color.New(color.FgWhite, color.BgHiBlue).SprintFunc()
+			if username := viper.GetString("username"); username != "" {
+				if endpoint := viper.GetString("endpoint"); endpoint != "" {
+					fmt.Printf("Logged in as %s at %s\n\n", info(username), info(endpoint))
+				} else {
+					fmt.Printf("Logged in as %s\n\n", info("%s", username))
+				}
+			}
+		} else {
+			color.Red("No user configuration found. Please login first.")
 		}
 	} else {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
