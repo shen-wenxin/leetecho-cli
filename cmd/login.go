@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"syscall"
 
 	"github.com/CallanBi/leetecho-cli/leetcode_client"
 	"github.com/CallanBi/leetecho-cli/leetcode_client/helper"
@@ -98,7 +99,7 @@ func getLoginInfo() (username string, password string) {
 		fmt.Scanln(&username)
 		fmt.Println(asked("Enter your password: "))
 		// hide password
-		pwd, err := term.ReadPassword(0)
+		pwd, err := term.ReadPassword(int(syscall.Stdin))
 		if err != nil {
 			color.Red("An Error occurs when reading password: " + err.Error())
 			os.Exit(1)
