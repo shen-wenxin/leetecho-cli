@@ -19,8 +19,8 @@ var LeetcodeClient *leetcode_client.LeetCodeClient
 
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "Enter username and password to login",
-	Long:  `Enter username and password to login to LeetCode(only CN region supported).`,
+	Short: "Enter useraccount and password to login",
+	Long:  `Enter useraccount and password to login to LeetCode(only CN region supported).`,
 	Run:   loginMain,
 }
 
@@ -43,7 +43,8 @@ func loginMain(cmd *cobra.Command, args []string) {
 }
 
 func Login() {
-	username, password := getLoginInfo()
+	useraccount, password := getLoginInfo()
+
 
 	var initClientErr error
 
@@ -53,13 +54,13 @@ func Login() {
 
 	s.Start()
 	// Endpoint is hard coded to CN region for the temporarily
-	LeetcodeClient, initClientErr = leetcode_client.Build(username, password, helper.CN)
+	LeetcodeClient, initClientErr = leetcode_client.Build(useraccount, password, helper.CN)
 
 	if initClientErr != nil {
 		s.Stop()
 		if leetechoError, ok := initClientErr.(*helper.ErrorResp); ok {
 			if leetechoError.Code == 400 {
-				color.Red("Login failed. Username or password is incorrect.")
+				color.Red("Login failed. useraccount or password is incorrect.")
 				WipeConfig()
 			} else {
 				color.Red("An Error occurs when initializing client: " + initClientErr.Error())
@@ -74,29 +75,29 @@ func Login() {
 	}
 
 	s.Stop()
-
-	viper.Set("username", username)
+	color.Green("useraccount sored: %s", useraccount)
+	viper.Set("useraccount", useraccount)
 	viper.Set("password", password)
 	viper.Set("endpoint", helper.CN)
 	viper.WriteConfig()
 
-	color.Green(fmt.Sprintf("Login successful. Current user: %s; Current endpoint: %s. \n", username, helper.CN))
+	color.Green(fmt.Sprintf("Login successful. Current user: %s; Current endpoint: %s. \n", useraccount, helper.CN))
 	color.Green(fmt.Sprintln("All user information is stored."))
 
 }
 
-func getLoginInfo() (username string, password string) {
+func getLoginInfo() (useraccount string, password string) {
 	if checkIfUserExist() {
 		info := color.New(color.FgWhite, color.BgHiMagenta).SprintFunc()
-		fmt.Println(info("Existing user found: ", viper.GetString("username")))
-		username = viper.GetString("username")
+		fmt.Println(info("Existing user found: ", viper.GetString("useraccount")))
+		useraccount = viper.GetString("useraccount")
 		password = viper.GetString("password")
 		return
 	} else {
-		// ask for username and password
+		// ask for useraccount and password
 		asked := color.New(color.Bold).SprintFunc()
-		fmt.Println(asked("Enter your LeetCode(CN) username: "))
-		fmt.Scanln(&username)
+		fmt.Println(asked("Enter your LeetCode(CN) useraccount: "))
+		fmt.Scanln(&useraccount)
 		fmt.Println(asked("Enter your password: "))
 		// hide password
 		pwd, err := term.ReadPassword(int(syscall.Stdin))
@@ -112,7 +113,8 @@ func getLoginInfo() (username string, password string) {
 }
 
 func checkIfUserExist() bool {
-	if viper.GetString("username") == "" {
+	// 试图寻找配置文件
+	if viper.GetString("useraccount") == "" {
 		return false
 	}
 	if viper.GetString("password") == "" {

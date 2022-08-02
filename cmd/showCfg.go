@@ -20,7 +20,7 @@ func init() {
 func showCfgMain(cmd *cobra.Command, args []string) {
 	info := color.New(color.Bold, color.FgHiYellow).SprintFunc()
 
-	color.Green("Current user: %s", info(viper.GetString("username")))
+	color.Green("Current user: %s", info(viper.GetString("useraccount")))
 	color.Green("Current endpoint: %s", info(viper.GetString("endpoint")))
 	reponame, repousername, branch, email := viper.GetString("reponame"), viper.GetString("repousername"), viper.GetString("branch"), viper.GetString("email")
 	if reponame != "" {
@@ -38,5 +38,7 @@ func showCfgMain(cmd *cobra.Command, args []string) {
 }
 
 func IsLogin() bool {
+	info := color.New(color.Bold, color.FgHiYellow).SprintFunc()
+	color.Green("Current settings: %s", info(viper.AllSettings()))
 	return len(viper.AllSettings()) != 0
 }
