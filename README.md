@@ -8,5 +8,5 @@ This cli tool simply implements basic functionality in Leetecho, including:
 
 - Login and logout functionality
 
-- checking update functionality
+- checking update
 
